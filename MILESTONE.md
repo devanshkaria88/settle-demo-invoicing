@@ -5,7 +5,7 @@
 ## Requirements
 
 - **R1.** `createInvoice({ customer, lines })` returns an invoice with a unique id, a total per line and a grand total, all in pence.
-- **R2.** `applyVat(invoice, ratePercent)` adds VAT at the given rate to every line and the grand total, rounding half-up to the penny.
+- **R2.** `applyVat(invoice, ratePercent)` adds VAT at the given rate to every line, rounding each line half-up to the penny; the grand total is the sum of the VAT-inclusive lines.
 - **R3.** A line with a zero or negative amount is rejected by throwing `InvalidAmountError`; no invoice is created.
 - **R4.** `listInvoices({ page, pageSize })` returns invoices in creation order, paginated, with `total` (count of all invoices) and page metadata.
 - **R5.** `formatGBP(pence)` renders amounts as pounds with thousands separators and two decimals, e.g. `123456 → "£1,234.56"`.
