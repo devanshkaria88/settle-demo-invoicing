@@ -36,15 +36,16 @@ export function createInvoice(input: { customer: string; lines: LineInput[] }): 
   return invoice;
 }
 
-/** Half-up rounding to the penny: 0.5p rounds up. */
+/** Half-up rounding to the penny using integer arithmetic only, so exact halves (x.5p) always round up and no float error can creep in. */
 function addVat(pence: number, ratePercent: number): number {
-  return Math.floor((pence * (100 + ratePercent)) / 100 + 0.5);
+  return Math.floor((pence * (100 + ratePercent) + 50) / 100);
 }
 
-/** R2: returns a new invoice with VAT applied per line and to the grand total. */
+/** R2: returns a new invoice with VAT applied to every line (rounded half-up per line); the grand total is the sum of the VAT-inclusive lines, so lines and total always reconcile. */
 export function applyVat(invoice: Invoice, ratePercent: number): Invoice {
   const lines = invoice.lines.map((l) => ({ ...l, totalPence: addVat(l.totalPence, ratePercent) }));
-  return { ...invoice, lines, totalPence: addVat(invoice.totalPence, ratePercent), vatRatePercent: ratePercent };
+  const totalPence = lines.reduce((sum, l) => sum + l.totalPence, 0);
+  return { ...invoice, lines, totalPence, vatRatePercent: ratePercent };
 }
 
 /** R4: creation-order pagination over the in-memory store (page is 1-based). */

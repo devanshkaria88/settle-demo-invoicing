@@ -21,8 +21,14 @@ describe('invoices', () => {
     expect(vat.lines.map((l) => l.totalPence)).toEqual([1201, 1204]);
     expect(vat.totalPence).toBe(2405);
     expect(vat.vatRatePercent).toBe(20);
+    // grand total is the sum of the VAT-inclusive lines
+    expect(vat.totalPence).toBe(vat.lines.reduce((s, l) => s + l.totalPence, 0));
     // exact half rounds up: 1 * 1.5 = 1.5 -> 2
     expect(applyVat(createInvoice({ customer: 'x', lines: [{ description: 'c', amountPence: 1 }] }), 50).totalPence).toBe(2);
+    // per-line half-up then summed: [1, 1] at 50% -> [2, 2] -> 4 (not 3 from rounding the pre-VAT total)
+    const halves = applyVat(createInvoice({ customer: 'x', lines: [{ description: 'h1', amountPence: 1 }, { description: 'h2', amountPence: 1 }] }), 50);
+    expect(halves.lines.map((l) => l.totalPence)).toEqual([2, 2]);
+    expect(halves.totalPence).toBe(4);
     expect(inv.totalPence).toBe(2004); // original untouched
   });
 
