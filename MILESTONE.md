@@ -12,4 +12,4 @@
 
 ## Acceptance
 
-All tests green on the PR head. Each requirement is covered by at least one passing test whose name references it (e.g. `R4 lists invoices paginated`). Test count must not decrease versus `main`. Payment is released automatically by Settle under the escrow policy v1.0 when every requirement is verified.
+All tests green on the PR head. Each requirement is covered by at least one passing test whose name references it (e.g. `R4 lists invoices paginated`). Test count must not decrease versus `main`. Payment is released automatically by Fluffy under the escrow policy v1.0 when every requirement is verified.
