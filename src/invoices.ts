@@ -47,8 +47,14 @@ export function applyVat(invoice: Invoice, ratePercent: number): Invoice {
   return { ...invoice, lines, totalPence: addVat(invoice.totalPence, ratePercent), vatRatePercent: ratePercent };
 }
 
-export function listInvoices(_opts: { page: number; pageSize: number }): Page<Invoice> {
-  throw new Error('not implemented');
+/** R4: creation-order pagination over the in-memory store (page is 1-based). */
+export function listInvoices(opts: { page: number; pageSize: number }): Page<Invoice> {
+  const pageSize = Math.max(1, Math.floor(opts.pageSize));
+  const page = Math.max(1, Math.floor(opts.page));
+  const total = store.length;
+  const totalPages = Math.ceil(total / pageSize);
+  const start = (page - 1) * pageSize;
+  return { items: store.slice(start, start + pageSize), page, pageSize, total, totalPages };
 }
 
 /** R5: 123456 -> "£1,234.56" */

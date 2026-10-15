@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { InvalidAmountError, applyVat, createInvoice, formatGBP, resetStore } from '../src/index.js';
+import { InvalidAmountError, applyVat, createInvoice, formatGBP, listInvoices, resetStore } from '../src/index.js';
 
 beforeEach(() => resetStore());
 
@@ -30,6 +30,17 @@ describe('invoices', () => {
     expect(() => createInvoice({ customer: 'x', lines: [{ description: 'zero', amountPence: 0 }] })).toThrow(InvalidAmountError);
     expect(() => createInvoice({ customer: 'x', lines: [{ description: 'ok', amountPence: 500 }, { description: 'neg', amountPence: -5 }] })).toThrow(InvalidAmountError);
     expect(() => createInvoice({ customer: 'x', lines: [{ description: 'ok', amountPence: 500 }] })).not.toThrow();
+  });
+
+  it('R4 listInvoices paginates in creation order with total', () => {
+    const ids = Array.from({ length: 5 }, (_, i) => createInvoice({ customer: `c${i}`, lines: [{ description: 'x', amountPence: 100 + i }] }).id);
+    const p1 = listInvoices({ page: 1, pageSize: 2 });
+    expect(p1.items.map((i) => i.id)).toEqual(ids.slice(0, 2));
+    expect(p1).toMatchObject({ page: 1, pageSize: 2, total: 5, totalPages: 3 });
+    const p3 = listInvoices({ page: 3, pageSize: 2 });
+    expect(p3.items.map((i) => i.id)).toEqual([ids[4]]);
+    expect(listInvoices({ page: 4, pageSize: 2 }).items).toEqual([]);
+    expect(listInvoices({ page: 1, pageSize: 10 }).totalPages).toBe(1);
   });
 
   it('R5 formatGBP renders £1,234.56', () => {
